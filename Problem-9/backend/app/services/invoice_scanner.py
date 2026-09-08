@@ -405,7 +405,13 @@ def smart_extract_amount(text: str, currency: str = "INR") -> float:
     PRIORITY 2: Currency-prefixed numbers: $XX.XX or €XX.XX.
     PRIORITY 3: Filter out phone numbers, zip codes, years, invoice IDs before fallback.
     """
-    lines = [l.strip() for l in text.splitlines() if l.strip()]
+    normalized_text = re.sub(
+        r'\b(?:LISD|LJSD|USO|USD)\s*([0-9]{1,4})(?:[.,]?([0-9]{2}))\b',
+        lambda match: f"USD {match.group(1)}.{match.group(2)}",
+        text,
+        flags=re.IGNORECASE,
+    )
+    lines = [l.strip() for l in normalized_text.splitlines() if l.strip()]
 
     # -------------------------------------------------------------
     # STEP 1: Scan for EXPLICIT TOTAL LABELS (Highest Accuracy!)
@@ -480,7 +486,7 @@ def smart_extract_amount(text: str, currency: str = "INR") -> float:
     # -------------------------------------------------------------
     currency_prefixed = re.findall(
         r'(?:[\$€£₹]|USD|EUR|GBP|AED|CAD|AUD)\s*([0-9]{1,3}(?:,[0-9]{3})*(?:\.[0-9]{1,2})|[0-9]+(?:\.[0-9]{1,2}))',
-        text,
+        normalized_text,
         re.IGNORECASE
     )
     prefixed_nums = []
@@ -494,7 +500,7 @@ def smart_extract_amount(text: str, currency: str = "INR") -> float:
     # -------------------------------------------------------------
     # STEP 4: Fallback Scan with Aggressive Noise Filtering
     # -------------------------------------------------------------
-    clean = text
+    clean = normalized_text
     # 1. Remove US and international phone numbers (e.g., 555-555-0192, 555-0192, (555) 555-0192)
     clean = re.sub(r'\b(?:\+?1[-.\s]?)?\(?[2-9][0-9]{2}\)?[-.\s]?[0-9]{3}[-.\s]?[0-9]{4}\b', ' ', clean)
     clean = re.sub(r'\b[0-9]{3}[-.\s][0-9]{4}\b', ' ', clean)

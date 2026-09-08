@@ -193,13 +193,16 @@ export const TransactionModal = ({ isOpen, onClose, transaction = null, onSucces
         api.categories.list(),
         api.accounts.list()
       ]);
-      setCategories(cats);
-      setAccounts(accs);
+      setCategories(cats || []);
+      setAccounts(accs || []);
 
       // Set defaults if empty
       if (!transaction) {
-        if (accs.length > 0) {
+        if (accs?.length > 0) {
           setForm(prev => ({ ...prev, account_id: String(accs[0].id) }));
+        }
+        if (cats?.length > 0) {
+          setForm(prev => ({ ...prev, category_id: String(cats.find((category) => category.type === prev.type)?.id || '') }));
         }
       }
     } catch (err) {

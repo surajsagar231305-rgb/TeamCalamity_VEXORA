@@ -120,6 +120,22 @@ Problem-9/
 
 ## 🚀 Installation & Running Locally
 
+### Demo Test Manager
+
+After starting the frontend and backend, open **Demo Test Manager** from the sidebar or visit `/demo-tests`. It runs live checks for API health, dashboard data, transactions, accounts, budgets, and the bundled USD 49 receipt scanner.
+
+New expense entries are limited to **Rs 20,000 per transaction**. Existing historical records remain readable.
+
+### Vercel Deployment
+
+Deploy the Vite frontend from `Problem-9/frontend` with:
+
+- Build command: `npm run build`
+- Output directory: `dist`
+- Environment variable: `VITE_API_BASE=https://your-backend-host.example.com`
+
+Host the FastAPI backend separately and use its public URL for `VITE_API_BASE`. The local Vite proxy only works during development.
+
 ### Prerequisites
 - **Python 3.10+** (Tested on Python 3.13)
 - **Node.js 18+** (Tested on Node.js v22 LTS)

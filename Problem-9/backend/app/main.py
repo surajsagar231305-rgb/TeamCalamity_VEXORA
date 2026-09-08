@@ -1,7 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.database import engine, Base
+from app.database import engine, Base, SessionLocal
 import app.models  # Ensures all models are imported before create_all
+from app.demo_data import ensure_demo_data
 from app.routes import (
     accounts_router,
     categories_router,
@@ -14,6 +15,8 @@ from app.routes import (
 
 # Create database tables
 Base.metadata.create_all(bind=engine)
+with SessionLocal() as startup_db:
+    ensure_demo_data(startup_db)
 
 app = FastAPI(
     title="Expense Management System API",

@@ -48,6 +48,10 @@ lerna-debug.log*
 .env.production
 .env.development
 
+# Runtime uploads; demo fixtures are kept in the repository
+**/uploads/*
+!**/uploads/sample_*
+
 # Editor & OS
 .vscode/
 .idea/

@@ -1,5 +1,5 @@
 import asyncio
-from app.services.invoice_scanner import detect_currency, smart_extract_amount
+from app.services.invoice_scanner import detect_currency, smart_extract_amount, ocr_image
 
 def test_usa_receipt():
     sample_usa_text = """
@@ -82,9 +82,19 @@ def test_paper_phone_receipt():
     assert curr == "USD", f"Expected USD, got {curr}"
     print("✓ Paper M test passed!")
 
+def test_bundled_receipt_ocr_amount():
+    import os
+    path = os.path.join(os.path.dirname(__file__), "uploads", "sample_usd_debit_receipt.png")
+    if not os.path.exists(path):
+        return
+    text = asyncio.run(ocr_image(path))
+    assert smart_extract_amount(text, "USD") == 49.0
+    print("✓ Bundled USD receipt OCR amount test passed!")
+
 if __name__ == "__main__":
     test_usa_receipt()
     test_usa_receipt_with_comma()
     test_indian_receipt()
     test_paper_phone_receipt()
+    test_bundled_receipt_ocr_amount()
     print("\nALL UNIT TESTS PASSED!")

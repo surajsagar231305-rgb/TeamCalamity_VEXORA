@@ -254,6 +254,10 @@ def update_transaction(transaction_id: int, tx_in: TransactionUpdate, db: Sessio
     old_account = tx.account
 
     update_data = tx_in.dict(exclude_unset=True)
+    if update_data.get("amount") is not None and tx.type == "Expense" and update_data["amount"] > 20000:
+        raise HTTPException(status_code=422, detail="Expense amount cannot exceed Rs 20,000")
+    if update_data.get("type") == "Expense" and update_data.get("amount", tx.amount) > 20000:
+        raise HTTPException(status_code=422, detail="Expense amount cannot exceed Rs 20,000")
     if "category_id" in update_data:
         cat = db.query(Category).filter(Category.id == update_data["category_id"]).first()
         if not cat:

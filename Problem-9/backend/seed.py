@@ -98,14 +98,14 @@ def seed():
         tx_list.extend([
             Transaction(title="NIFTY 50 Index Fund SIP", amount=15000.0, type="Expense", category_id=cat_map["Mutual Funds & SIP"].id, account_id=acc_map["HDFC Salary Account"].id, date=d(6), payment_method="Net Banking", notes="Automated monthly mutual fund investment"),
             Transaction(title="Parag Parikh Flexi Cap SIP", amount=10000.0, type="Expense", category_id=cat_map["Mutual Funds & SIP"].id, account_id=acc_map["HDFC Salary Account"].id, date=d(6), payment_method="Net Banking", notes="Equity diversification SIP"),
-            Transaction(title="Purchased 15 Shares of HDFC Bank", amount=24750.0, type="Expense", category_id=cat_map["Demat & Equity"].id, account_id=acc_map["Zerodha Demat Account"].id, date=d(12), payment_method="Net Banking", notes="Demat equity accumulation at ₹1,650/share"),
+            Transaction(title="Purchased 15 Shares of HDFC Bank", amount=19800.0, type="Expense", category_id=cat_map["Demat & Equity"].id, account_id=acc_map["Zerodha Demat Account"].id, date=d(12), payment_method="Net Banking", notes="Demat equity accumulation at ₹1,320/share"),
             Transaction(title="NIFTY 50 Index Fund SIP - Last Month", amount=15000.0, type="Expense", category_id=cat_map["Mutual Funds & SIP"].id, account_id=acc_map["HDFC Salary Account"].id, date=d(36), payment_method="Net Banking", notes="Monthly SIP instalment"),
             Transaction(title="Purchased 20 Shares of Tata Motors", amount=18600.0, type="Expense", category_id=cat_map["Demat & Equity"].id, account_id=acc_map["Zerodha Demat Account"].id, date=d(48), payment_method="Net Banking", notes="Long term equity accumulation")
         ])
 
         # ----------------- CREDIT CARD TRANSACTIONS & DUES -----------------
         tx_list.extend([
-            Transaction(title="Apple Store - AirPods Pro USB-C", amount=22900.0, type="Expense", category_id=cat_map["Shopping"].id, account_id=acc_map["HDFC Regalia Gold"].id, date=d(3), payment_method="Credit Card", is_credit_due=True, due_date=d(-15), status="Unpaid", receipt_image_url="/uploads/sample_apple_receipt.png", notes="Upcoming credit card statement due"),
+            Transaction(title="Apple Store - AirPods Pro USB-C", amount=19900.0, type="Expense", category_id=cat_map["Shopping"].id, account_id=acc_map["HDFC Regalia Gold"].id, date=d(3), payment_method="Credit Card", is_credit_due=True, due_date=d(-15), status="Unpaid", receipt_image_url="/uploads/sample_apple_receipt.png", notes="Upcoming credit card statement due"),
             Transaction(title="Croma Electronics - 4K Monitor", amount=16499.0, type="Expense", category_id=cat_map["Shopping"].id, account_id=acc_map["SBI SimplyClick Card"].id, date=d(8), payment_method="Credit Card", is_credit_due=True, due_date=d(-18), status="Unpaid", notes="Work from home monitor setup"),
             Transaction(title="Fine Dining at Smoke House Deli", amount=3850.0, type="Expense", category_id=cat_map["Food & Dining"].id, account_id=acc_map["HDFC Regalia Gold"].id, date=d(4), payment_method="Credit Card", is_credit_due=True, due_date=d(-15), status="Unpaid", notes="Weekend team dinner"),
             Transaction(title="Flight Tickets to Bengaluru - Indigo", amount=8940.0, type="Expense", category_id=cat_map["Transportation"].id, account_id=acc_map["HDFC Regalia Gold"].id, date=d(19), payment_method="Credit Card", is_credit_due=False, status="Paid", notes="Conference travel booked on card"),
@@ -114,7 +114,7 @@ def seed():
 
         # ----------------- DAILY, FOOD, UTILITIES, HOUSING -----------------
         tx_list.extend([
-            Transaction(title="Monthly Apartment Rent", amount=24000.0, type="Expense", category_id=cat_map["House Rent"].id, account_id=acc_map["HDFC Salary Account"].id, date=d(6), payment_method="Bank Transfer", notes="2BHK apartment rent to landlord"),
+            Transaction(title="Monthly Apartment Rent", amount=20000.0, type="Expense", category_id=cat_map["House Rent"].id, account_id=acc_map["HDFC Salary Account"].id, date=d(6), payment_method="Bank Transfer", notes="2BHK apartment rent to landlord"),
             Transaction(title="Nature's Basket Organic Groceries", amount=3420.0, type="Expense", category_id=cat_map["Food & Dining"].id, account_id=acc_map["HDFC Salary Account"].id, date=d(2), payment_method="UPI", notes="Weekly fruits, veggies, and pantry items"),
             Transaction(title="Blinkit Quick Delivery", amount=740.0, type="Expense", category_id=cat_map["Food & Dining"].id, account_id=acc_map["HDFC Salary Account"].id, date=d(1), payment_method="UPI", notes="Milk, bread, and breakfast items"),
             Transaction(title="Swiggy Gourmet Dinner", amount=1280.0, type="Expense", category_id=cat_map["Food & Dining"].id, account_id=acc_map["HDFC Salary Account"].id, date=d(3), payment_method="UPI", notes="Italian pasta and artisan sourdough"),
@@ -128,7 +128,7 @@ def seed():
             Transaction(title="Coursera Full Stack Specialization", amount=3999.0, type="Expense", category_id=cat_map["Education"].id, account_id=acc_map["HDFC Salary Account"].id, date=d(15), payment_method="Debit Card", notes="Cloud architecture certification course"),
 
             # Last month expenses for comparison
-            Transaction(title="Apartment Rent - Last Month", amount=24000.0, type="Expense", category_id=cat_map["House Rent"].id, account_id=acc_map["HDFC Salary Account"].id, date=d(36), payment_method="Bank Transfer", notes="Rent payment"),
+            Transaction(title="Apartment Rent - Last Month", amount=20000.0, type="Expense", category_id=cat_map["House Rent"].id, account_id=acc_map["HDFC Salary Account"].id, date=d(36), payment_method="Bank Transfer", notes="Rent payment"),
             Transaction(title="Supermarket Pantry Bulk Stock", amount=6850.0, type="Expense", category_id=cat_map["Food & Dining"].id, account_id=acc_map["HDFC Salary Account"].id, date=d(38), payment_method="Debit Card", notes="Monthly grocery haul"),
             Transaction(title="Fuel & Metro Card Recharge", amount=3200.0, type="Expense", category_id=cat_map["Transportation"].id, account_id=acc_map["HDFC Salary Account"].id, date=d(40), payment_method="UPI", notes="Travel expenses"),
             Transaction(title="Tata Power Electricity - Last Month", amount=3120.0, type="Expense", category_id=cat_map["Utilities & Bills"].id, account_id=acc_map["HDFC Salary Account"].id, date=d(41), payment_method="UPI", notes="Summer AC electricity bill"),

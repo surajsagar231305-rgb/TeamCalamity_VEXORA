@@ -131,6 +131,18 @@ export const AiInvoiceScannerModal = ({ isOpen, onClose, onSuccess }) => {
 
       setExtractedData(res);
 
+      // The scan can finish before the dropdown request on a fresh deployment.
+      // Reload categories here so the detected category always has an option.
+      let availableCategories = categories;
+      if (!availableCategories.length) {
+        availableCategories = await api.categories.list('Expense');
+        setCategories(availableCategories || []);
+      }
+      const detectedCategory = res.category_id
+        || availableCategories.find((category) => category.name === res.category_name)?.id
+        || availableCategories[0]?.id
+        || '';
+
       // Pre-fill editable form with smart AI predictions
       const parsedDate = res.date ? res.date.split('T')[0] : new Date().toISOString().split('T')[0];
       const detectedCurr = res.currency || 'INR';
@@ -145,7 +157,7 @@ export const AiInvoiceScannerModal = ({ isOpen, onClose, onSuccess }) => {
         currency: detectedCurr,
         exchange_rate: detectedRate,
         type: 'Expense',
-        category_id: String(res.category_id || (categories[0]?.id || '')),
+        category_id: String(detectedCategory),
         account_id: String(res.account_id || (accounts[0]?.id || '')),
         payment_method: res.payment_method || 'UPI',
         date: parsedDate,

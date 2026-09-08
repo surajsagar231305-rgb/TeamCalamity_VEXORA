@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import Optional
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 class CategoryBrief(BaseModel):
     id: int
@@ -39,7 +39,11 @@ class TransactionBase(BaseModel):
     exchange_rate: Optional[float] = 1.0
 
 class TransactionCreate(TransactionBase):
-    pass
+    @model_validator(mode="after")
+    def validate_expense_limit(self):
+        if self.type == "Expense" and self.amount > 20000:
+            raise ValueError("Expense amount cannot exceed Rs 20,000")
+        return self
 
 class TransactionUpdate(BaseModel):
     title: Optional[str] = Field(default=None, min_length=1, max_length=200)
