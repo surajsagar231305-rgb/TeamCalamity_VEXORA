@@ -7,10 +7,9 @@ from app.models.transaction import Transaction
 
 def ensure_demo_data(db):
     """Populate a fresh database so the deployed demo is usable immediately."""
-    if db.query(Category).count() or db.query(Account).count():
-        return
-
-    categories = [
+    categories = db.query(Category).all()
+    if not categories:
+        categories = [
         Category(name="Food & Dining", type="Expense", icon="utensils", color="#F59E0B", is_system=True),
         Category(name="Shopping", type="Expense", icon="shopping-bag", color="#EC4899", is_system=True),
         Category(name="Transportation", type="Expense", icon="car", color="#3B82F6", is_system=True),
@@ -21,22 +20,28 @@ def ensure_demo_data(db):
         Category(name="Other Expenses", type="Expense", icon="more-horizontal", color="#64748B", is_system=True),
         Category(name="Salary", type="Income", icon="dollar-sign", color="#22C55E", is_system=True),
         Category(name="Freelance & Consulting", type="Income", icon="briefcase", color="#06B6D4", is_system=True),
-    ]
-    db.add_all(categories)
-    db.flush()
+        ]
+        db.add_all(categories)
+        db.flush()
 
-    account = Account(
-        name="Demo Savings Account",
-        type="Savings",
-        opening_balance=50000.0,
-        current_balance=50000.0,
-        account_number_last4="2026",
-        notes="Auto-created demo account",
-    )
-    db.add(account)
-    db.flush()
+    account = db.query(Account).first()
+    if not account:
+        account = Account(
+            name="Demo Savings Account",
+            type="Savings",
+            opening_balance=50000.0,
+            current_balance=50000.0,
+            account_number_last4="2026",
+            notes="Auto-created demo account",
+        )
+        db.add(account)
+        db.flush()
 
     category_map = {category.name: category for category in categories}
+    if db.query(Transaction).count():
+        db.commit()
+        return
+
     now = datetime.utcnow()
     demo_transactions = [
         ("Monthly Salary", 50000.0, "Income", "Salary", 7, "Bank Transfer"),
