@@ -254,9 +254,12 @@ def update_transaction(transaction_id: int, tx_in: TransactionUpdate, db: Sessio
     old_account = tx.account
 
     update_data = tx_in.dict(exclude_unset=True)
-    if update_data.get("amount") is not None and tx.type == "Expense" and update_data["amount"] > 20000:
-        raise HTTPException(status_code=422, detail="Expense amount cannot exceed Rs 20,000")
-    if update_data.get("type") == "Expense" and update_data.get("amount", tx.amount) > 20000:
+    effective_type = update_data.get("type", tx.type)
+    effective_currency = update_data.get("currency", tx.currency)
+    effective_amount = update_data.get("amount", tx.amount)
+    effective_original_amount = update_data.get("original_amount", tx.original_amount or effective_amount)
+    limit_value = effective_amount if effective_currency == "INR" else effective_original_amount
+    if effective_type == "Expense" and limit_value > 20000:
         raise HTTPException(status_code=422, detail="Expense amount cannot exceed Rs 20,000")
     if "category_id" in update_data:
         cat = db.query(Category).filter(Category.id == update_data["category_id"]).first()

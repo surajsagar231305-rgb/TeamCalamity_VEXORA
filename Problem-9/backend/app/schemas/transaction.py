@@ -41,7 +41,8 @@ class TransactionBase(BaseModel):
 class TransactionCreate(TransactionBase):
     @model_validator(mode="after")
     def validate_expense_limit(self):
-        if self.type == "Expense" and self.amount > 20000:
+        limit_value = self.amount if self.currency == "INR" else (self.original_amount or self.amount)
+        if self.type == "Expense" and limit_value > 20000:
             raise ValueError("Expense amount cannot exceed Rs 20,000")
         return self
 
