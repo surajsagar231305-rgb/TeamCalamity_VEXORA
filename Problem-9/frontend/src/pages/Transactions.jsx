@@ -87,6 +87,7 @@ export const Transactions = () => {
     const [receiptTx, setReceiptTx] = useState(null);
     const [aiScannerOpen, setAiScannerOpen] = useState(false);
     const [importing, setImporting] = useState(false);
+    const [scanningStatement, setScanningStatement] = useState(false);
 
     const fetchDropdowns = async () => {
         try {
@@ -214,11 +215,38 @@ export const Transactions = () => {
             setPage(1);
             await fetchTransactions();
             window.dispatchEvent(new CustomEvent("transaction-updated"));
-            addToast(`Imported ${result.imported} transactions. Skipped ${result.skipped_duplicates} duplicates${result.failed ? `, ${result.failed} failed` : ""}.`);
+            addToast(
+                `Imported ${result.imported} transactions. Skipped ${result.skipped_duplicates} duplicates${result.failed ? `, ${result.failed} failed` : ""}.`,
+            );
         } catch (error) {
             addToast(error.message || "CSV import failed", "error");
         } finally {
             setImporting(false);
+        }
+    };
+
+    const handleStatementScan = async (event) => {
+        const file = event.target.files?.[0];
+        event.target.value = "";
+        if (!file) return;
+        setScanningStatement(true);
+        try {
+            const result = await api.transactions.scanStatement(file);
+            if (!result.rows?.length) throw new Error("No dated transaction rows were detected in this screenshot");
+            let added = 0;
+            for (const row of result.rows) {
+                await api.transactions.create({ ...row, notes: "Imported from statement screenshot" });
+                added += 1;
+            }
+            setSortIndex(0);
+            setPage(1);
+            await fetchTransactions();
+            window.dispatchEvent(new CustomEvent("transaction-updated"));
+            addToast(`Detected and added ${added} transactions from the screenshot.`);
+        } catch (error) {
+            addToast(error.message || "Statement scan failed", "error");
+        } finally {
+            setScanningStatement(false);
         }
     };
 
@@ -256,7 +284,19 @@ export const Transactions = () => {
                     <label className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-emerald-200 dark:border-emerald-900/60 bg-emerald-50 dark:bg-emerald-950/30 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 text-sm font-semibold shadow-xs transition-all cursor-pointer">
                         <Upload className="w-4 h-4" />
                         {importing ? "Importing..." : "Import CSV"}
-                        <input type="file" accept=".csv,text/csv" onChange={handleImportCSV} disabled={importing} className="hidden" />
+                        <input
+                            type="file"
+                            accept=".csv,text/csv"
+                            onChange={handleImportCSV}
+                            disabled={importing}
+                            className="hidden"
+                        />
+                    </label>
+
+                    <label className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-cyan-200 dark:border-cyan-900/60 bg-cyan-50 dark:bg-cyan-950/30 hover:bg-cyan-100 dark:hover:bg-cyan-900/40 text-cyan-700 dark:text-cyan-300 text-sm font-semibold shadow-xs transition-all cursor-pointer">
+                        <Camera className="w-4 h-4" />
+                        {scanningStatement ? "Scanning..." : "Scan Statement"}
+                        <input type="file" accept="image/png,image/jpeg,image/webp" onChange={handleStatementScan} disabled={scanningStatement} className="hidden" />
                     </label>
 
                     <button

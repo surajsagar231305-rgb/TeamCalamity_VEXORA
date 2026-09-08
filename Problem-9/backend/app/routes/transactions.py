@@ -3,6 +3,7 @@ import uuid
 import shutil
 import csv
 import io
+import re
 from typing import List, Optional
 from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, Query, Response, UploadFile, File, status
@@ -18,7 +19,7 @@ from app.schemas.transaction import (
     TransactionResponse
 )
 from app.services.export import generate_transactions_csv
-from app.services.invoice_scanner import scan_and_extract_invoice
+from app.services.invoice_scanner import scan_and_extract_invoice, ocr_image, detect_currency, smart_extract_amount
 from app.routes.accounts import sync_account_balance
 
 router = APIRouter(prefix="/api/transactions", tags=["Transactions"])
@@ -197,6 +198,56 @@ async def scan_invoice(file: UploadFile = File(...), db: Session = Depends(get_d
     receipt_url = f"/uploads/{safe_name}"
     extracted_data = await scan_and_extract_invoice(target_path, db, receipt_url)
     return extracted_data
+
+@router.post("/scan-statement")
+async def scan_statement(file: UploadFile = File(...), db: Session = Depends(get_db)):
+    """Read a statement screenshot and return one transaction candidate per dated line."""
+    allowed_exts = {".jpg", ".jpeg", ".png", ".webp"}
+    _, ext = os.path.splitext((file.filename or "").lower())
+    if ext not in allowed_exts:
+        raise HTTPException(status_code=400, detail="Upload a JPG, PNG, or WebP statement screenshot")
+
+    target_path = os.path.join(UPLOADS_DIR, f"statement_{uuid.uuid4().hex[:12]}{ext}")
+    with open(target_path, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+
+    raw_text = await ocr_image(target_path)
+    currency, _, exchange_rate = detect_currency(raw_text)
+    expense_category = db.query(Category).filter(Category.type == "Expense").order_by(Category.id.asc()).first()
+    account = db.query(Account).order_by(Account.id.asc()).first()
+    rows = []
+    date_pattern = re.compile(r"\b(\d{1,2}[/-]\d{1,2}[/-]\d{2,4}|\d{4}[/-]\d{1,2}[/-]\d{1,2})\b")
+    number_pattern = re.compile(r"(?:[$€£₹]|USD|INR|EUR|GBP|AED|CAD|AUD)?\s*([0-9]{1,3}(?:,[0-9]{3})*(?:\.\d{1,2})|[0-9]+(?:\.\d{1,2}))", re.IGNORECASE)
+    for line in raw_text.splitlines():
+        date_match = date_pattern.search(line)
+        numbers = number_pattern.findall(line)
+        if not date_match or not numbers:
+            continue
+        amount = smart_extract_amount(line, currency)
+        if amount <= 0:
+            continue
+        title = date_pattern.sub("", line)
+        title = number_pattern.sub("", title).replace("|", " ").replace("-", " ").strip(" :,-")
+        if len(title) < 3 or title.lower() in {"total", "balance", "opening", "closing"}:
+            continue
+        try:
+            date_value = datetime.fromisoformat(date_match.group(1).replace("/", "-") + ("T00:00:00" if date_match.group(1).count("-") == 2 and len(date_match.group(1).split("-")[0]) == 4 else "T00:00:00"))
+        except ValueError:
+            date_value = datetime.utcnow()
+        rows.append({
+            "title": title[:200],
+            "amount": round(amount * exchange_rate, 2) if currency != "INR" else round(amount, 2),
+            "original_amount": round(amount, 2),
+            "currency": currency,
+            "exchange_rate": exchange_rate,
+            "type": "Expense",
+            "category_id": expense_category.id if expense_category else None,
+            "account_id": account.id if account else None,
+            "date": date_value.isoformat(),
+            "payment_method": "Other",
+            "status": "Completed",
+        })
+    return {"rows": rows[:500], "detected_lines": len(rows), "raw_text": raw_text[:1000]}
 
 @router.post("/import-csv")
 async def import_transactions_csv(file: UploadFile = File(...), db: Session = Depends(get_db)):

@@ -138,6 +138,8 @@ Date,Title,Amount,Type,Category,Payment Method,Account,Status,Notes
 
 Category and account names must already exist in the app. Up to 5,000 rows can be imported at once; invalid rows are reported, and duplicate rows are skipped automatically.
 
+For a bank statement screenshot, use **Scan Statement** on the Transactions page. The OCR scanner looks for dated transaction lines, creates one history entry per detected line, and places the imported entries at the top. Clear screenshots with visible dates and amounts work best; always review OCR results after importing.
+
 ### Vercel Deployment
 
 Deploy the Vite frontend from `Problem-9/frontend` with:

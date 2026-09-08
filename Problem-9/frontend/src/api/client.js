@@ -123,6 +123,17 @@ export const api = {
             if (!res.ok) throw new Error(data.detail || "CSV import failed");
             return data;
         },
+        scanStatement: async (file) => {
+            const formData = new FormData();
+            formData.append("file", file);
+            const res = await fetch(`${API_BASE}/api/transactions/scan-statement`, {
+                method: "POST",
+                body: formData,
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.detail || "Statement scan failed");
+            return data;
+        },
     },
     categories: {
         list: (type) => request(`/api/categories${toQueryString({ type })}`),
