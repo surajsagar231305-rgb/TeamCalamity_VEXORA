@@ -18,6 +18,7 @@ import {
     Receipt,
     Camera,
     Sparkles,
+    Upload,
 } from "lucide-react";
 import { api } from "../api/client";
 import {
@@ -85,6 +86,7 @@ export const Transactions = () => {
     const [txToDelete, setTxToDelete] = useState(null);
     const [receiptTx, setReceiptTx] = useState(null);
     const [aiScannerOpen, setAiScannerOpen] = useState(false);
+    const [importing, setImporting] = useState(false);
 
     const fetchDropdowns = async () => {
         try {
@@ -201,6 +203,25 @@ export const Transactions = () => {
         addToast("Exporting transactions to CSV...", "info");
     };
 
+    const handleImportCSV = async (event) => {
+        const file = event.target.files?.[0];
+        event.target.value = "";
+        if (!file) return;
+        setImporting(true);
+        try {
+            const result = await api.transactions.importCsv(file);
+            setSortIndex(0);
+            setPage(1);
+            await fetchTransactions();
+            window.dispatchEvent(new CustomEvent("transaction-updated"));
+            addToast(`Imported ${result.imported} transactions. Skipped ${result.skipped_duplicates} duplicates${result.failed ? `, ${result.failed} failed` : ""}.`);
+        } catch (error) {
+            addToast(error.message || "CSV import failed", "error");
+        } finally {
+            setImporting(false);
+        }
+    };
+
     const totalPages = Math.ceil(totalCount / pageSize) || 1;
 
     return (
@@ -231,6 +252,12 @@ export const Transactions = () => {
                         <Download className="w-4 h-4 text-slate-500" />
                         Export CSV
                     </button>
+
+                    <label className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-emerald-200 dark:border-emerald-900/60 bg-emerald-50 dark:bg-emerald-950/30 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 text-sm font-semibold shadow-xs transition-all cursor-pointer">
+                        <Upload className="w-4 h-4" />
+                        {importing ? "Importing..." : "Import CSV"}
+                        <input type="file" accept=".csv,text/csv" onChange={handleImportCSV} disabled={importing} className="hidden" />
+                    </label>
 
                     <button
                         onClick={() => {

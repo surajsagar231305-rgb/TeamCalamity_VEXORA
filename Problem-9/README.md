@@ -1,4 +1,5 @@
 # ExpenseFlow — Expense Management System
+
 ### Vexora-26 Hackathon • Problem 9
 
 > A modern, full-stack, personal finance and expense management dashboard engineered for **Problem 9** of **Vexora-26**. Track multi-account cashflows across Demat equity portfolios, health and life insurance policies, credit card billing cycles, and daily household expenses in one unified, real-time application.
@@ -10,6 +11,7 @@
 Individuals manage different types of financial expenses such as **Demat accounts, insurance, medical policies, credit cards, and debit transactions**, making it difficult to track their overall spending.
 
 **ExpenseFlow** solves this problem by providing a centralized financial intelligence hub where users can:
+
 - **Record and categorize financial transactions** with real-time balance synchronization across accounts.
 - **Monitor multi-account assets and liabilities** (Savings, Current, Demat, Mutual Funds, Credit Cards, Cash Wallets).
 - **Track credit card billing cycles, statement dues, and payment statuses** with 1-click settlement toggles.
@@ -24,17 +26,17 @@ Individuals manage different types of financial expenses such as **Demat account
 
 ## 🛠️ Technology Stack
 
-| Layer | Technology | Rationale |
-|---|---|---|
-| **Frontend** | React 18 + Vite | Lightning-fast HMR and reactive UI |
-| **Styling** | Tailwind CSS | Modern responsive SaaS aesthetic with Dark/Light mode |
-| **Visualizations** | Recharts | Interactive Donut, Dual-Bar, and Curved Trend charts |
-| **Icons** | Lucide React | Clean, modern iconography |
-| **Routing** | React Router v6 | Client-side SPA navigation with active tab indicators |
-| **Backend** | Python 3 + FastAPI | High-performance async REST API with auto OpenAPI docs |
-| **Database** | SQLite + SQLAlchemy ORM | Zero-configuration local database with foreign key support |
-| **Validation** | Pydantic v2 | Strict schema validation for requests and responses |
-| **Data Export** | Python CSV Engine | Direct filtered transaction export |
+| Layer              | Technology              | Rationale                                                  |
+| ------------------ | ----------------------- | ---------------------------------------------------------- |
+| **Frontend**       | React 18 + Vite         | Lightning-fast HMR and reactive UI                         |
+| **Styling**        | Tailwind CSS            | Modern responsive SaaS aesthetic with Dark/Light mode      |
+| **Visualizations** | Recharts                | Interactive Donut, Dual-Bar, and Curved Trend charts       |
+| **Icons**          | Lucide React            | Clean, modern iconography                                  |
+| **Routing**        | React Router v6         | Client-side SPA navigation with active tab indicators      |
+| **Backend**        | Python 3 + FastAPI      | High-performance async REST API with auto OpenAPI docs     |
+| **Database**       | SQLite + SQLAlchemy ORM | Zero-configuration local database with foreign key support |
+| **Validation**     | Pydantic v2             | Strict schema validation for requests and responses        |
+| **Data Export**    | Python CSV Engine       | Direct filtered transaction export                         |
 
 > **100% Free & Local**: No external paid services or third-party API keys are required for core functionality.
 
@@ -126,6 +128,16 @@ After starting the frontend and backend, open **Demo Test Manager** from the sid
 
 New expense entries are limited to **Rs 20,000 per transaction**. Existing historical records remain readable.
 
+### Bulk Transaction Import
+
+For large histories, open **Transactions** and choose **Import CSV**. The importer accepts exported CSV files or files with these columns:
+
+```text
+Date,Title,Amount,Type,Category,Payment Method,Account,Status,Notes
+```
+
+Category and account names must already exist in the app. Up to 5,000 rows can be imported at once; invalid rows are reported, and duplicate rows are skipped automatically.
+
 ### Vercel Deployment
 
 Deploy the Vite frontend from `Problem-9/frontend` with:
@@ -137,6 +149,7 @@ Deploy the Vite frontend from `Problem-9/frontend` with:
 Host the FastAPI backend separately and use its public URL for `VITE_API_BASE`. The local Vite proxy only works during development.
 
 ### Prerequisites
+
 - **Python 3.10+** (Tested on Python 3.13)
 - **Node.js 18+** (Tested on Node.js v22 LTS)
 - **Git**
@@ -146,60 +159,66 @@ Host the FastAPI backend separately and use its public URL for `VITE_API_BASE`. 
 ### Step 1: Backend Setup
 
 1. Open a terminal and navigate to the backend directory:
-   ```bash
-   cd Problem-9/backend
-   ```
 
-2. *(Optional but recommended)* Create and activate a Python virtual environment:
-   - **Windows (PowerShell):**
-     ```powershell
-     python -m venv venv
-     .\venv\Scripts\activate
-     ```
-   - **Linux / macOS:**
-     ```bash
-     python3 -m venv venv
-     source venv/bin/activate
-     ```
+    ```bash
+    cd Problem-9/backend
+    ```
+
+2. _(Optional but recommended)_ Create and activate a Python virtual environment:
+    - **Windows (PowerShell):**
+        ```powershell
+        python -m venv venv
+        .\venv\Scripts\activate
+        ```
+    - **Linux / macOS:**
+        ```bash
+        python3 -m venv venv
+        source venv/bin/activate
+        ```
 
 3. Install backend dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
+
+    ```bash
+    pip install -r requirements.txt
+    ```
 
 4. **Seed the database** with rich, realistic demonstration data:
-   ```bash
-   python seed.py
-   ```
-   > This seeds 7 accounts (Savings, Demat, Credit Cards, Cash), 18 categories, 39 realistic multi-month transactions, and 8 monthly budgets.
+
+    ```bash
+    python seed.py
+    ```
+
+    > This seeds 7 accounts (Savings, Demat, Credit Cards, Cash), 18 categories, 39 realistic multi-month transactions, and 8 monthly budgets.
 
 5. Start the FastAPI backend server:
-   ```bash
-   uvicorn app.main:app --reload --port 8000
-   ```
-   The backend API will start at `http://127.0.0.1:8000`.
-   - **Swagger Interactive API Documentation**: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
-   - **ReDoc API Documentation**: [http://127.0.0.1:8000/redoc](http://127.0.0.1:8000/redoc)
+    ```bash
+    uvicorn app.main:app --reload --port 8000
+    ```
+    The backend API will start at `http://127.0.0.1:8000`.
+    - **Swagger Interactive API Documentation**: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
+    - **ReDoc API Documentation**: [http://127.0.0.1:8000/redoc](http://127.0.0.1:8000/redoc)
 
 ---
 
 ### Step 2: Frontend Setup
 
 1. In a second terminal window, navigate to the frontend directory:
-   ```bash
-   cd Problem-9/frontend
-   ```
+
+    ```bash
+    cd Problem-9/frontend
+    ```
 
 2. Install npm dependencies:
-   ```bash
-   npm install
-   ```
+
+    ```bash
+    npm install
+    ```
 
 3. Start the Vite development server:
-   ```bash
-   npm run dev
-   ```
-   The frontend application will start at `http://localhost:5173`.
+    ```bash
+    npm run dev
+    ```
+    The frontend application will start at `http://localhost:5173`.
 
 ---
 
@@ -213,6 +232,7 @@ python test_api.py
 ```
 
 Expected output:
+
 ```
 Testing /api/health ...
 [OK] Health check: {'status': 'healthy', 'app': 'Expense Management System API', 'problem': 'Problem 9 - Vexora-26', 'docs': '/docs', 'version': '1.0.0'}
@@ -245,6 +265,7 @@ ALL BACKEND API TESTS PASSED SUCCESSFULLY!
 ## 📊 Main Features Walkthrough
 
 ### 1. Unified Dashboard
+
 - **Dynamic Time Filters**: Switch seamlessly between `This Week`, `This Month`, `Last Month`, `Last 3 Months`, `This Year`, and `All Time`.
 - **Summary Cards**: Total Balance, Total Income, Total Expenses, This Month's Expenses, and Transaction Count.
 - **Donut Chart**: Category-wise expense percentage with center hover tooltips and legend.
@@ -253,19 +274,21 @@ ALL BACKEND API TESTS PASSED SUCCESSFULLY!
 - **Holdings Snapshot**: Real-time balance preview across Bank, Demat, Cards, and Cash.
 
 ### 2. Transaction Management & Advanced Filtering
+
 - **Real CRUD**: Add, edit, delete, and inspect transaction details.
 - **Advanced Filtering Toolbar**:
-  - Full-text search (Title, category, account, notes).
-  - Income / Expense type filter.
-  - Category dropdown.
-  - Account dropdown.
-  - Payment method filter (UPI, Credit Card, Debit Card, Net Banking, Bank Transfer, Cash, Other).
-  - Date Range pickers (From and To).
-  - Multi-criteria sorting (Newest, Oldest, Amount High-Low, Amount Low-High, Name A-Z, Name Z-A).
-  - Active filter count indicator & 1-click "Clear Filters" button.
+    - Full-text search (Title, category, account, notes).
+    - Income / Expense type filter.
+    - Category dropdown.
+    - Account dropdown.
+    - Payment method filter (UPI, Credit Card, Debit Card, Net Banking, Bank Transfer, Cash, Other).
+    - Date Range pickers (From and To).
+    - Multi-criteria sorting (Newest, Oldest, Amount High-Low, Amount Low-High, Name A-Z, Name Z-A).
+    - Active filter count indicator & 1-click "Clear Filters" button.
 - **CSV Export**: Instantly exports filtered transactions to a downloadable spreadsheet.
 
 ### 3. Credit Card Financial Tracking
+
 - Dedicated credit card dashboard showing total outstanding due across all cards.
 - Credit utilization percentage with progress indicators.
 - Upcoming statement due date alerts.
@@ -273,18 +296,21 @@ ALL BACKEND API TESTS PASSED SUCCESSFULLY!
 - One-click "Mark Paid / Unpaid" toggle for statement settlements.
 
 ### 4. Insurance & Healthcare Tracking
+
 - Breakdown of Health Insurance, Life Insurance, Medicines, and Hospital expenses.
 - Active policy tracking with annual premium amounts, last payment date, and next renewal due date.
 - Dedicated healthcare transaction audit log.
 
 ### 5. Monthly & Category Budget Tracking
+
 - Set overall monthly spending limits or category-specific targets.
 - Color-coded progress bars:
-  - 🟢 **Normal** (<80% used)
-  - 🟡 **Warning** (80%–99% used)
-  - 🔴 **Danger Alert** (>100% exceeded limit)
+    - 🟢 **Normal** (<80% used)
+    - 🟡 **Warning** (80%–99% used)
+    - 🔴 **Danger Alert** (>100% exceeded limit)
 
 ### 6. Real Financial Insights Engine
+
 - Highest and lowest spending categories.
 - Average daily spending velocity.
 - Largest transaction highlight.
@@ -294,17 +320,20 @@ ALL BACKEND API TESTS PASSED SUCCESSFULLY!
 - Algorithmic financial health tips based on current savings rate.
 
 ### 7. AI Smart Invoice & Receipt Scanner
+
 - **100% Offline & Free**: Powered by Windows OCR and heuristic NLP algorithms without any paid API keys.
 - **Automatic Field Extraction**: Extracts merchant name, total bill amount, transaction date, items, and policy/invoice reference numbers.
 - **Accurate Payment Method Classification**: Checks **Debit Card** before Credit Card to prevent misclassification. Debit cards are linked to bank/savings accounts while credit cards are routed to credit liabilities.
 - **Instant Demo Bills**: Quick 1-click test buttons for Hackathon judges (Apple Store ₹22,900 INR, Star Health ₹16,500 INR, Cloud Host $49.00 USD Debit, and Berlin Office €85.00 EUR Debit).
 
 ### 8. Multi-Currency Support & Live Conversion
+
 - **Universal Currency Detection**: Recognizes international currencies including USD ($), EUR (€), GBP (£), AED, CAD, AUD, SGD, and JPY.
 - **Dual Amount Tracking**: Preserves original foreign bill amounts (e.g. `$49.00 USD`) while automatically converting to base INR (₹) using exchange rates for unified financial balance tracking.
 - **Multi-Currency Badges**: Highlights original currency across Transactions history, Dashboard, and Digital Receipts.
 
 ### 9. Interactive Digital Transaction Receipts
+
 - Click any transaction row on Dashboard or Transactions to inspect a formal electronic audit receipt.
 - **Print & PDF Export**: Clean, high-resolution printable receipt styling.
 - **Original Receipt Photo**: Inspect attached invoice/receipt photos directly in the modal.
@@ -312,6 +341,7 @@ ALL BACKEND API TESTS PASSED SUCCESSFULLY!
 - **Clipboard Sharing**: Copy full receipt summary text formatted for Slack, WhatsApp, or email.
 
 ### 10. UI/UX Design & Dark Mode
+
 - SaaS-grade interface built with Tailwind CSS.
 - Smooth Light / Dark mode toggle persisted in `localStorage`.
 - Mobile-responsive layout with collapsible drawer navigation.
@@ -321,6 +351,7 @@ ALL BACKEND API TESTS PASSED SUCCESSFULLY!
 ---
 
 ## 🔮 Future Roadmap
+
 1. **Account Aggregator (AA) Integration**: Secure automated bank statement synchronization via India's open-banking Account Aggregator framework (Setu / Finvu).
 2. **SIP & Demat Portfolio Valuation Sync**: Integration with live market feeds (NSE / BSE) for real-time equity net worth tracking.
 3. **Automated WhatsApp Expense Bot**: Log expenses via WhatsApp chat with receipt photo attachments.
@@ -330,6 +361,7 @@ ALL BACKEND API TESTS PASSED SUCCESSFULLY!
 ## 📦 Hackathon Repository Submission Guide
 
 The hackathon organizer has specified:
+
 > "Once your project is built, push your project to this repository:
 > **Vexora-26 GitHub Repository**: [https://github.com/satyammahto/Vexora-26](https://github.com/satyammahto/Vexora-26)
 > Repository/folder name must be either: **Team Name** OR **Problem Statement Number**"
@@ -339,34 +371,37 @@ Strict folder name used: **`Problem-9`**
 ### Exact Git Commands to Push
 
 1. Clone the hackathon repository:
-   ```bash
-   git clone https://github.com/satyammahto/Vexora-26.git
-   cd Vexora-26
-   ```
+
+    ```bash
+    git clone https://github.com/satyammahto/Vexora-26.git
+    cd Vexora-26
+    ```
 
 2. Copy the `Problem-9` folder from your local workspace into the repository:
-   - **Windows (PowerShell):**
-     ```powershell
-     Copy-Item -Path "c:\Users\akash singh\OneDrive\Desktop\expense_management\Problem-9" -Destination ".\Problem-9" -Recurse
-     ```
-   - **Linux / macOS:**
-     ```bash
-     cp -r "/path/to/expense_management/Problem-9" ./Problem-9
-     ```
+    - **Windows (PowerShell):**
+        ```powershell
+        Copy-Item -Path "c:\Users\akash singh\OneDrive\Desktop\expense_management\Problem-9" -Destination ".\Problem-9" -Recurse
+        ```
+    - **Linux / macOS:**
+        ```bash
+        cp -r "/path/to/expense_management/Problem-9" ./Problem-9
+        ```
 
 3. Verify repository status (ensure no `.env`, `node_modules`, or `__pycache__` are staged):
-   ```bash
-   git status
-   ```
+
+    ```bash
+    git status
+    ```
 
 4. Commit and push:
-   ```bash
-   git add Problem-9/
-   git commit -m "Add Problem 9 Expense Management System - Vexora-26"
-   git push origin main
-   ```
-   *(If the repository uses another default branch, verify with `git branch -a` and push to that branch).*
+    ```bash
+    git add Problem-9/
+    git commit -m "Add Problem 9 Expense Management System - Vexora-26"
+    git push origin main
+    ```
+    _(If the repository uses another default branch, verify with `git branch -a` and push to that branch)._
 
 > [!IMPORTANT]
+>
 > - Do NOT force push (`git push --force`).
 > - Do NOT delete or overwrite other teams' folders in `Vexora-26`.

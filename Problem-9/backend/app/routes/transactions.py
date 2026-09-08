@@ -1,6 +1,8 @@
 import os
 import uuid
 import shutil
+import csv
+import io
 from typing import List, Optional
 from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, Query, Response, UploadFile, File, status
@@ -195,6 +197,87 @@ async def scan_invoice(file: UploadFile = File(...), db: Session = Depends(get_d
     receipt_url = f"/uploads/{safe_name}"
     extracted_data = await scan_and_extract_invoice(target_path, db, receipt_url)
     return extracted_data
+
+@router.post("/import-csv")
+async def import_transactions_csv(file: UploadFile = File(...), db: Session = Depends(get_db)):
+    """Import up to 5,000 transactions from an exported or template CSV."""
+    if not file.filename or not file.filename.lower().endswith(".csv"):
+        raise HTTPException(status_code=400, detail="Please upload a .csv file")
+
+    raw_data = await file.read()
+    try:
+        text = raw_data.decode("utf-8-sig")
+        reader = csv.DictReader(io.StringIO(text))
+    except UnicodeDecodeError as exc:
+        raise HTTPException(status_code=400, detail="CSV must be UTF-8 encoded") from exc
+
+    required_columns = {"Date", "Title", "Amount", "Type", "Category", "Payment Method", "Account"}
+    headers = set(reader.fieldnames or [])
+    missing = sorted(required_columns - headers)
+    if missing:
+        raise HTTPException(status_code=400, detail=f"Missing CSV columns: {', '.join(missing)}")
+
+    categories = {category.name.casefold(): category for category in db.query(Category).all()}
+    accounts = {account.name.casefold(): account for account in db.query(Account).all()}
+    existing_keys = {
+        (tx.title.casefold(), round(tx.amount, 2), tx.date.isoformat(), tx.account_id)
+        for tx in db.query(Transaction).all()
+    }
+    imported = 0
+    skipped = 0
+    errors = []
+    pending = []
+
+    for row_number, row in enumerate(reader, start=2):
+        if row_number > 5001:
+            errors.append({"row": row_number, "error": "Maximum 5,000 rows per import"})
+            break
+        try:
+            title = (row.get("Title") or "").strip()
+            tx_type = (row.get("Type") or "Expense").strip().title()
+            category = categories.get((row.get("Category") or "").strip().casefold())
+            account = accounts.get((row.get("Account") or "").strip().casefold())
+            amount = float((row.get("Amount") or "").replace(",", "").strip())
+            date_value = datetime.fromisoformat((row.get("Date") or "").strip().replace("Z", ""))
+            if not title or tx_type not in {"Income", "Expense"} or amount <= 0:
+                raise ValueError("Title, Type, and positive Amount are required")
+            if not category:
+                raise ValueError(f"Category not found: {row.get('Category', '')}")
+            if not account:
+                raise ValueError(f"Account not found: {row.get('Account', '')}")
+            if tx_type == "Expense" and amount > 20000:
+                raise ValueError("INR expense amount cannot exceed Rs 20,000")
+
+            duplicate_key = (title.casefold(), round(amount, 2), date_value.isoformat(), account.id)
+            if duplicate_key in existing_keys:
+                skipped += 1
+                continue
+            existing_keys.add(duplicate_key)
+            pending.append(Transaction(
+                title=title,
+                amount=amount,
+                original_amount=amount,
+                currency="INR",
+                exchange_rate=1.0,
+                type=tx_type,
+                category_id=category.id,
+                account_id=account.id,
+                date=date_value,
+                payment_method=(row.get("Payment Method") or "UPI").strip(),
+                status=(row.get("Status") or "Completed").strip(),
+                notes=(row.get("Notes") or "").strip() or None,
+            ))
+            imported += 1
+        except (TypeError, ValueError) as exc:
+            errors.append({"row": row_number, "error": str(exc)})
+
+    if pending:
+        db.add_all(pending)
+        db.commit()
+        for account in accounts.values():
+            sync_account_balance(db, account)
+
+    return {"imported": imported, "skipped_duplicates": skipped, "failed": len(errors), "errors": errors[:100]}
 
 @router.post("", response_model=TransactionResponse, status_code=status.HTTP_201_CREATED)
 def create_transaction(tx_in: TransactionCreate, db: Session = Depends(get_db)):
